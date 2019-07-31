@@ -1,8 +1,9 @@
-#! /usr/bin/python
+#!/usr/bin/python
 
 import sys
 import xml.etree.ElementTree as etree
 import urllib
+import ssl
 from optparse import OptionParser
 from subprocess import call
 
@@ -37,8 +38,10 @@ def flattenImports(parent, tag):
 			url_skiplist.append(url)
 		parent.remove(importEl)
 
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+
 def loadTreeFromUrl(url):
-	fp = urllib.urlopen(url)
+	fp = urllib.urlopen(url, context=ssl_context)
 	tree = etree.parse(fp)
 	return tree
 
@@ -86,7 +89,7 @@ finally:
 	out.close()
 
 if options.tidy:
-	tidy_args = ['tidy', '-mi', '-xml', options.filename]
+	tidy_args = ['tidy', '-mi', '-w', '0', '-xml', options.filename]
 	if not options.verbose:
 		tidy_args.insert(1, '-q')
 	call(tidy_args)
